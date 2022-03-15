@@ -1,3 +1,4 @@
+// Copyright (C) 2021 Tom R. Dial
 #include <assert.h>
 #include <stdlib.h>
 #include <time.h>
@@ -44,7 +45,7 @@ int main(int argc, char* argv[]) {
   router.AddHost("srv-05", 2.0);
   router.AddHost("srv-06", 2.0);
 
-  cout << "-------" << endl;
+  router.RemoveHost("srv-04");
 
   // Map to track routing stats.
   map<string, int> hist;
@@ -56,8 +57,6 @@ int main(int argc, char* argv[]) {
     const string host = router.Route(key);
     hist[host]++;
   }
-
-  cout << "-------" << endl;
 
   // Print "histogram", % utilization of each host
   cout << "Histogram: " << endl;

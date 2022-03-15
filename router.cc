@@ -1,5 +1,5 @@
+// Copyright (C) 2021 Tom R. Dial
 #include "router.h"
-//#include "fibonacci_hash.h"
 #include <algorithm>
 #include <functional>
 #include <iostream>
@@ -11,10 +11,9 @@ using ::std::endl;
 
 namespace {
 
-// Limits governing the number of slots to use for normal-weighted hosts.
+// Limits governing the number of replicas to use.
 const int kMinReplicaCount = 1;
 const int kMaxReplicaCount = 256;
-// const int kNormalWeightReplicas = 128;
 
 // The minimum weight. Specifying a weight of 0.0, however, will cause the
 // number of slots to be rounded up to at least one.
@@ -74,13 +73,14 @@ bool Router::AddHost(const std::string& host, double weight) {
 
   // Compute total number of slots for the host.
   const size_t replicas = ComputeSlotCount(default_replica_count_, weight);
-  cerr << "replicas: " << replicas << endl;
 
   // Create a standard library hash function that maps strings => size_t
   std::hash<std::string> hash_func;
 
-  // Create new record for the host. We'll fill in the slots member in
-  // in the loop below.
+  // Create new record for the host. We store the object in a map so that
+	// we may look it up by name, and we also store weak references to the
+	// entry in the replica index so that we can find the host given the
+	// replica ID.
   HostInfo* info = new HostInfo();
   info->name = host;
   info->weight = weight;
@@ -88,6 +88,9 @@ bool Router::AddHost(const std::string& host, double weight) {
   // Store the mapping from host names => info structures.
   hosts_[host] = info;
 
+	// Add N replicas (determined above in the computation. We guarantee
+	// that we will add the exact number of replicas by handling the
+	// admittedly unlikely occurrence of a collision.
   size_t replica_id = 0;
   while (info->replicas.size() < replicas) {
     ++replica_id;
@@ -100,16 +103,30 @@ bool Router::AddHost(const std::string& host, double weight) {
     info->replica_name = replica_name;
     info->replicas.push_back(replica_hash);
     replica_index_[replica_hash] = info;
-    cerr << "replica_name: " << replica_name
-         << ", replica_hash: " << replica_hash << endl;
   }
 
   return true;
 }
 
 // Remove a host from the routing table.
-void Router::RemoveHost(const std::string& host) {
-  cerr << "TODO(tdial): Implement" << endl;
+bool Router::RemoveHost(const std::string& host) {
+	auto it = hosts_.find(host);
+	if (it == hosts_.end()) {
+		return false;
+	}
+
+	// Erase all replicas.
+	for (auto id : it->second->replicas) {
+		replica_index_.erase(id);
+	}
+
+	// The host record was dynamically allocated; delete .
+	delete it->second;
+
+	// Erase the host entry completely.
+	hosts_.erase(it);
+
+	return true;
 }
 
 // Route a user key to a host.
@@ -137,6 +154,3 @@ std::string Router::Route(const std::string& key) {
   return "";
 }
 
-void Router::Debug() {
-  cerr << "replica_index_.size() = " << replica_index_.size() << endl;
-}
