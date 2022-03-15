@@ -13,7 +13,7 @@ demo: main.o router.o
 
 .PHONY:
 format:
-	clang-format -style=Google -i main.cc
+	clang-format -style=Google -i *.cc *.h
 
 .cc.o:
 	$(CXX) $(CXXFLAGS) -c $<

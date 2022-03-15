@@ -35,7 +35,7 @@
 //
 //   // Remove host upon detecting it is out of service.
 //   router.RemoveHost("foo");
-//  
+//
 
 class Router {
  public:
@@ -47,13 +47,13 @@ class Router {
   ~Router();
 
   // Add a host to the routing table with specified weight.
-	// Returns 'true' on success.
+  // Returns 'true' on success.
   // Returns 'false' if the host has already been added.
   bool AddHost(const std::string& host, double weight);
 
   // Remove a host from the routing table.
-	// Returns 'true' on success.
-	// Returns 'false' if no host by the specified name existed.
+  // Returns 'true' on success.
+  // Returns 'false' if no host by the specified name existed.
   bool RemoveHost(const std::string& host);
 
   // Route a user key to a host.
