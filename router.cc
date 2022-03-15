@@ -16,7 +16,7 @@ const int kMinReplicaCount = 1;
 const int kMaxReplicaCount = 256;
 
 // The minimum weight. Specifying a weight of 0.0, however, will cause the
-// number of slots to be rounded up to at least one.
+// number of replicas to be rounded up to at least one.
 const double kMinWeight = 0.0f;
 
 // The maximum weight is 16x, which seems reasonable in a world in which
@@ -24,12 +24,11 @@ const double kMinWeight = 0.0f;
 // that we would like to have greater weights. Use this for now.
 const double kMaxWeight = 16.0f;
 
-// Compute the number of slots for a host.
-size_t ComputeSlotCount(int normal_weight_slot_count, double weight) {
-  const double normal_slot_count = normal_weight_slot_count;
-  const double unadjusted_slots = normal_slot_count * weight;
-  const size_t integer_slots = (size_t)(unadjusted_slots);
-  return ((integer_slots < 1) ? 1 : integer_slots);
+// Compute the number of replicas for a host.
+size_t ComputeReplicaCount(int base_replica_count, double weight) {
+	const size_t unadj_replicas =
+		static_cast<size_t>(static_cast<double>(base_replica_count) * weight);
+	return ((unadj_replicas < 1) ? 1 : unadj_replicas);
 }
 
 std::string MakeReplicaName(const std::string& name, size_t replica) {
@@ -71,8 +70,8 @@ bool Router::AddHost(const std::string& host, double weight) {
     return false;
   }
 
-  // Compute total number of slots for the host.
-  const size_t replicas = ComputeSlotCount(default_replica_count_, weight);
+  // Compute total number of replicas for the host.
+  const size_t replicas = ComputeReplicaCount(default_replica_count_, weight);
 
   // Create a standard library hash function that maps strings => size_t
   std::hash<std::string> hash_func;
