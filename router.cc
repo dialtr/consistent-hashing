@@ -50,8 +50,8 @@ Router::Router(int default_replica_count)
 
 Router::~Router() {
   // Delete structures allocated for hosts.
-  // The replicas_ index are essentially "weak references" and thus
-  // no action must be taken there.
+  // The replicas_ index contains "weak references" to the host
+	// structures, so the default destructor for that is O.K.
   for (auto host : hosts_) {
     delete host.second;
   }

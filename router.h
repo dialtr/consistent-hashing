@@ -10,15 +10,15 @@
 // The **Router** class implements a stable mechanism for routing keys to
 // hosts in a way that minimizes "reshuffles" when hosts become unavailable.
 // It is implemented in terms of a consistent hash ring in which potentially
-// many replicas of each host are used in order to ensure a relatively even
+// many replicas of each host are used to ensure a relatively even
 // distribution of load to each host.
 //
 // In addition to supporting a user-specified count of replicas (the number
-// replicas used by default) Router supports weighting hosts with a floating
-// point "weight" value. The actual number of replicas added to the ring is
-// the product of the weight and the default replica count. As least one
-// host replica is placed on the logical ring even if the weight is set to
-// zero.
+// of replicas used by default) **Router** supports weighting hosts with a
+// floating point "weight" value. The actual number of replicas added to the
+// ring is the product of the weight and the default replica count. At least
+// one host replica is placed on the logical ring even if the weight is set
+// to zero.
 //
 // Typical lifecycle:
 //
